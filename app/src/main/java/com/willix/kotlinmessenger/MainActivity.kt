@@ -1,5 +1,6 @@
 package com.willix.kotlinmessenger
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -17,10 +18,16 @@ class MainActivity : AppCompatActivity() {
 
             Log.d("MainActivity", "Email is: " + email)
             Log.d("MainActivity", "Password: $password")
+
+            // Firebase Authentication to create a user with email and password
         }
 
         already_have_account_text_view.setOnClickListener {
             Log.d("MainActivity", "Try to show login activity")
+
+            //launch the login activity somehow
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
         }
 
     }
