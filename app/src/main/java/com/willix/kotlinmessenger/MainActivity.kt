@@ -4,6 +4,8 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +22,13 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "Password: $password")
 
             // Firebase Authentication to create a user with email and password
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener {
+                        if (!it.isSuccessful) return@addOnCompleteListener
+
+                        // else if successful
+                        Log.d("Main", "Successfully created user with uid: ${it.result.user.uid}")
+                    }
         }
 
         already_have_account_text_view.setOnClickListener {
