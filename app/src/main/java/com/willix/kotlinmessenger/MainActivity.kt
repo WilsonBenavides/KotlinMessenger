@@ -1,8 +1,11 @@
 package com.willix.kotlinmessenger
 
+import android.app.Activity
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
@@ -28,7 +31,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         selectphoto_button_register.setOnClickListener {
-            Log.d("MainActivity", "try to show photo selector")
+            Log.d("RegisterActivity", "try to show photo selector")
+
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, 0)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK && data != null) {
+            //proceed and check what the selected image was...
+            Log.d("RegisterActivity", "Photo was selected")
+
+            val uri = data.data
+
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+
+            val bitmapDrawable = BitmapDrawable(bitmap)
+            selectphoto_button_register.setBackgroundDrawable(bitmapDrawable)
         }
     }
 
