@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        selectphoto_button_register.setOnClickListener {
+            Log.d("MainActivity", "try to show photo selector")
+        }
     }
 
     private fun performRegister() {
