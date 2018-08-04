@@ -3,6 +3,7 @@ package com.willix.kotlinmessenger
 import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -10,9 +11,11 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class RegisterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    var selectedPhotoUri: Uri? = null
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -46,9 +51,9 @@ class MainActivity : AppCompatActivity() {
             //proceed and check what the selected image was...
             Log.d("RegisterActivity", "Photo was selected")
 
-            val uri = data.data
+            selectedPhotoUri = data.data
 
-            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
 
             val bitmapDrawable = BitmapDrawable(bitmap)
             selectphoto_button_register.setBackgroundDrawable(bitmapDrawable)
@@ -73,11 +78,33 @@ class MainActivity : AppCompatActivity() {
                 if (!it.isSuccessful) return@addOnCompleteListener
 
                 // else if successful
-                Log.d("Main", "Successfully created user with uid: ${it.result.user.uid}")
+                Log.d("RegisterActivity", "Successfully created user with uid: ${it.result.user.uid}")
+
+                uploadImageToFirebaseStorage()
             }
             .addOnFailureListener{
-                Log.d("Main", "Failed to create user: ${it.message}")
+                Log.d("RegisterActivity", "Failed to create user: ${it.message}")
                 Toast.makeText(this, "Failed to create user: ${it.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun uploadImageToFirebaseStorage() {
+
+        if (selectedPhotoUri == null) {
+            return
+        }
+
+        val filename = UUID.randomUUID().toString()
+        val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
+
+        Log.d("RegisterActivity", "upload image func")
+
+        ref.putFile(selectedPhotoUri!!)
+                .addOnSuccessListener {
+                    Log.d("RegisterActivity", "Successfully uploaded image: ${it.metadata?.path}")
+                }
+                .addOnFailureListener {
+                    Log.d("RegisterActivity", "Failed to upload image to storage: ${it.message}")
+                }
     }
 }
