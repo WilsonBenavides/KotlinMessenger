@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -97,14 +98,34 @@ class RegisterActivity : AppCompatActivity() {
         val filename = UUID.randomUUID().toString()
         val ref = FirebaseStorage.getInstance().getReference("/images/$filename")
 
-        Log.d("RegisterActivity", "upload image func")
-
         ref.putFile(selectedPhotoUri!!)
                 .addOnSuccessListener {
                     Log.d("RegisterActivity", "Successfully uploaded image: ${it.metadata?.path}")
+
+                    ref.downloadUrl.addOnSuccessListener {
+                        Log.d("RegisterActivity", "File Location: $it")
+
+                        saveUserToFirebaseDatabase(it.toString())
+                    }
                 }
-                .addOnFailureListener {
-                    Log.d("RegisterActivity", "Failed to upload image to storage: ${it.message}")
+                .addOnFailureListener{
+                    // do some logging here
                 }
     }
+
+    private fun saveUserToFirebaseDatabase(profileImageUrl: String) {
+        val uid = FirebaseAuth.getInstance().uid ?: ""
+        val ref = FirebaseDatabase.getInstance().getReference("/users/$uid")
+
+        val user = User(uid, username_edittext_register.text.toString(), profileImageUrl)
+
+        ref.setValue(user)
+                .addOnSuccessListener {
+                    Log.d("RegisterActivity", "Finally we saved the user to Firebase Database")
+                }
+    }
+}
+
+class User(val uid: String, val username: String, val profileImageUrl: String) {
+
 }
